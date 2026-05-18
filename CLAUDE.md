@@ -1,4 +1,4 @@
-# RecipeBook — Project Guide
+# Plately — Project Guide
 
 ## What This Is
 

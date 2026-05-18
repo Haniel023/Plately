@@ -14,7 +14,7 @@ function Header({ displayName }) {
     <header className="app-header">
       <Link to="/browse" className="header-brand">
         <div className="header-brand-icon">🍳</div>
-        RecipeBook
+        Plately
       </Link>
 
       <div className="header-right">

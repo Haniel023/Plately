@@ -48,7 +48,7 @@ function Register() {
         <div className="auth-logo">
           <ChefHat size={34} />
         </div>
-        <h1>RecipeBook</h1>
+        <h1>Plately</h1>
         <p>Start sharing your favorite recipes with the world.</p>
         <div className="auth-tags">
           <span>🍳 Share Recipes</span>
@@ -59,7 +59,7 @@ function Register() {
 
       <form className="modern-auth-card" onSubmit={handleRegister}>
         <p className="auth-kicker">Create account</p>
-        <h2>Join RecipeBook</h2>
+        <h2>Join Plately</h2>
         <p className="auth-subtitle">Build your personal recipe collection and plan meals.</p>
 
         <input

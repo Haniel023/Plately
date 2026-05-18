@@ -37,7 +37,7 @@ function Login() {
         <div className="auth-logo">
           <ChefHat size={34} />
         </div>
-        <h1>RecipeBook</h1>
+        <h1>Plately</h1>
         <p>Discover, share, and plan delicious meals together.</p>
         <div className="auth-tags">
           <span>🍳 Share Recipes</span>
@@ -48,7 +48,7 @@ function Login() {
 
       <form className="modern-auth-card" onSubmit={handleLogin}>
         <p className="auth-kicker">Welcome back</p>
-        <h2>Login to RecipeBook</h2>
+        <h2>Login to Plately</h2>
         <p className="auth-subtitle">Browse recipes and plan your weekly meals.</p>
 
         <input
