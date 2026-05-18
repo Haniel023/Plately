@@ -212,6 +212,41 @@ Mobile-first, `max-width: 700px` breakpoint. No dark mode in v1. Currency: Phili
 
 ---
 
+## PWA Setup
+
+Configured with `vite-plugin-pwa`. Icon assets generated from `public/icon.svg` using `@vite-pwa/assets-generator`.
+
+To regenerate icons after changing `icon.svg`:
+```bash
+npx pwa-assets-generator --config pwa-assets.config.js
+```
+
+Generated files (committed to repo, do not edit manually):
+- `public/favicon.ico`
+- `public/pwa-64x64.png`
+- `public/pwa-192x192.png`
+- `public/pwa-512x512.png`
+- `public/maskable-icon-512x512.png`
+- `public/apple-touch-icon-180x180.png`
+
+Workbox strategy: precache all static assets, `NetworkFirst` for Supabase API calls with a 10s timeout.
+
+---
+
+## Deployment
+
+Hosted on Vercel. `vercel.json` rewrites all routes to `index.html` so direct links and refreshes work with React Router:
+
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+
+Without this, Vercel treats the app as a static file server and returns 404 for any route that isn't a real file on disk.
+
+---
+
 ## Reference Projects
 
 This app's patterns are modeled after `d:\10_VSC\ReactJS\SpendieClone` — same stack, same CSS conventions, same Supabase integration style. When in doubt, check SpendieClone for reference implementations.
