@@ -319,19 +319,20 @@
    =========== */
 .ingredient-form-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr auto;
-  gap: 8px;
+  grid-template-columns: 2fr 0.6fr 0.9fr 0.9fr auto;
+  gap: 6px;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .ingredient-form-row input,
 .ingredient-form-row select {
-  padding: 11px 12px;
+  padding: 10px 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
   font-size: 14px;
   outline: none;
+  min-width: 0;
 }
 
 .ingredient-form-row input:focus,
@@ -340,37 +341,58 @@
   box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
 }
 
+/* Mobile: keep single row, just tighten up */
+@media (max-width: 700px) {
+  .ingredient-form-row {
+    grid-template-columns: 1.6fr 0.5fr 0.7fr 0.7fr auto;
+    gap: 4px;
+  }
+
+  .ingredient-form-row input,
+  .ingredient-form-row select {
+    padding: 9px 7px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .ingr-price::placeholder {
+    content: "₱";
+  }
+}
+
 .step-form-row {
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .step-form-number {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   background: var(--primary-light);
   color: var(--primary-dark);
   display: grid;
   place-items: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
-  margin-top: 12px;
+  margin-top: 11px;
 }
 
 .step-form-row textarea {
   flex: 1;
-  padding: 11px 12px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
   font-size: 14px;
   outline: none;
-  resize: vertical;
-  min-height: 60px;
+  resize: none;
+  overflow: hidden;
+  min-height: 42px;
   font-family: inherit;
+  line-height: 1.5;
 }
 
 .step-form-row textarea:focus {
@@ -416,15 +438,6 @@
   color: var(--text-muted);
 }
 
-@media (max-width: 700px) {
-  .ingredient-form-row {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .ingredient-form-row > *:first-child {
-    grid-column: 1 / -1;
-  }
-}
 
 /* ==============
    MEAL PLANNER
@@ -843,4 +856,183 @@
 
 .confirm-dialog-actions button {
   flex: 1;
+}
+
+/* ==========
+   STAR RATING
+   ========== */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  cursor: default;
+  color: #d1d5db;
+  transition: color 0.12s;
+}
+
+.star-btn.filled {
+  color: #f59e0b;
+}
+
+.star-rating--interactive .star-btn {
+  cursor: pointer;
+}
+
+.star-rating--interactive .star-btn:hover,
+.star-rating--interactive .star-btn.filled {
+  color: #f59e0b;
+}
+
+/* ================
+   RATING SECTION
+   ================ */
+.rating-section {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rating-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rating-avg {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.rating-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.rating-user-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.rating-saved {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Recipe card small star */
+.recipe-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+/* ===========
+   COMMENTS
+   =========== */
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+}
+
+.comment-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.12);
+}
+
+.comment-login-prompt {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.comment-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.comment-author {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.comment-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
 }

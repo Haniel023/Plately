@@ -12,6 +12,7 @@ import MyRecipes from "./pages/MyRecipes";
 import MealPlanner from "./pages/MealPlanner";
 import ExpenseTracker from "./pages/ExpenseTracker";
 import Profile from "./pages/Profile";
+import PublicProfile from "./pages/PublicProfile";
 
 function ProtectedRoute({ children }) {
   const [session, setSession] = useState(undefined);
@@ -45,6 +46,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/recipes/:id" element={<RecipeDetail />} />
+        <Route path="/users/:id" element={<PublicProfile />} />
         <Route
           path="/share"
           element={

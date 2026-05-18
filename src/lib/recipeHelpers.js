@@ -4,14 +4,14 @@ export function formatCurrency(amount) {
 
 export function costPerServing(ingredients, servingSize) {
   const total = (ingredients || []).reduce((sum, ing) => {
-    return sum + Number(ing.quantity || 0) * Number(ing.price_per_unit || 0);
+    return sum + Number(ing.price_per_unit || 0);
   }, 0);
   return servingSize > 0 ? total / servingSize : total;
 }
 
 export function totalIngredientCost(ingredients) {
   return (ingredients || []).reduce((sum, ing) => {
-    return sum + Number(ing.quantity || 0) * Number(ing.price_per_unit || 0);
+    return sum + Number(ing.price_per_unit || 0);
   }, 0);
 }
 

@@ -108,10 +108,11 @@ function EditRecipe() {
     let cover_url = existingCoverUrl;
 
     if (coverFile) {
-      const path = `${user.id}/${Date.now()}-${coverFile.name}`;
+      const safeName = coverFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${user.id}/${Date.now()}-${safeName}`;
       const { error: uploadError } = await supabase.storage
         .from("recipe-covers")
-        .upload(path, coverFile);
+        .upload(path, coverFile, { contentType: coverFile.type });
 
       if (uploadError) {
         setMessage("Failed to upload cover image.");

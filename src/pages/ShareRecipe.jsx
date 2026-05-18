@@ -71,13 +71,14 @@ function ShareRecipe() {
     let cover_url = null;
 
     if (coverFile) {
-      const path = `${user.id}/${Date.now()}-${coverFile.name}`;
+      const safeName = coverFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${user.id}/${Date.now()}-${safeName}`;
       const { error: uploadError } = await supabase.storage
         .from("recipe-covers")
-        .upload(path, coverFile);
+        .upload(path, coverFile, { contentType: coverFile.type });
 
       if (uploadError) {
-        setMessage("Failed to upload cover image.");
+        setMessage(`Upload failed: ${uploadError.message}`);
         setLoading(false);
         return;
       }
@@ -102,7 +103,7 @@ function ShareRecipe() {
       .single();
 
     if (recipeError) {
-      setMessage("Failed to save recipe.");
+      setMessage(`Failed to save recipe: ${recipeError.message}`);
       setLoading(false);
       return;
     }
@@ -244,7 +245,7 @@ function ShareRecipe() {
               </button>
             </div>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-              Name — Qty — Unit — Price per unit (₱)
+              Name — Qty — Unit — Actual price (₱)
             </div>
             {ingredients.map((ing, i) => (
               <IngredientRow

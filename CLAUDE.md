@@ -4,10 +4,10 @@
 
 A recipe-sharing web app where users can:
 - Browse and share recipes with ingredient cost tracking
+- Rate recipes (1–5 stars) and leave comments
+- View public chef profiles and their recipes
 - Plan meals on a weekly or daily calendar
 - Track grocery expenses from planned meals + misc costs
-
-Built by: Claude Code (claude-sonnet-4-6) alongside the developer.
 
 ---
 
@@ -30,16 +30,29 @@ State management: plain `useState` / `useEffect` hooks. No Redux, no Zustand, no
 ## Getting Started
 
 ### 1. Environment
-`.env` already has Supabase credentials filled in.
+Create a `.env` file in the project root:
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
 ### 2. Run the Supabase Schema
-Open the Supabase Dashboard → SQL Editor and run the full contents of `supabase_schema.sql`. This creates all 6 tables with RLS policies.
+Open the Supabase Dashboard → SQL Editor and run the full contents of `supabase_schema.sql`. This creates all 8 tables with RLS policies and the auto-profile trigger.
 
 ### 3. Create Storage Bucket
 In Supabase Dashboard → Storage → New Bucket:
 - Name: `recipe-covers`
 - Set to **Public**
-- Allow authenticated uploads
+
+Then run these storage policies in the SQL Editor:
+```sql
+CREATE POLICY "Users can upload covers" ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'recipe-covers' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "Public can view covers" ON storage.objects FOR SELECT TO public
+  USING (bucket_id = 'recipe-covers');
+CREATE POLICY "Users can delete their own covers" ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'recipe-covers' AND (storage.foldername(name))[1] = auth.uid()::text);
+```
 
 ### 4. Start Dev Server
 ```bash
@@ -55,6 +68,7 @@ npm run dev
 |---|---|---|
 | Browse Recipes | `/browse` | No |
 | Recipe Detail | `/recipes/:id` | No |
+| Public Profile | `/users/:id` | No |
 | Share Recipe | `/share` | Yes |
 | Edit Recipe | `/recipes/:id/edit` | Yes |
 | My Recipes | `/my-recipes` | Yes |
@@ -75,21 +89,23 @@ src/
 
   pages/
     Login.jsx             — Supabase auth + navigate to /browse
-    Register.jsx          — signUp + insert into profiles table
+    Register.jsx          — signUp + upsert into profiles table
     Browse.jsx            — Public recipe feed, search + category filter
-    RecipeDetail.jsx      — Full recipe view, cost breakdown, owner edit/delete
+    RecipeDetail.jsx      — Full recipe view, cost breakdown, ratings, comments, owner edit/delete
     ShareRecipe.jsx       — Create recipe (image upload, ingredients, steps)
     EditRecipe.jsx        — Pre-populated edit form (delete+reinsert pattern)
     MyRecipes.jsx         — User's own recipes with CRUD actions
     MealPlanner.jsx       — Week/day calendar, recipe picker modal, upsert slots
     ExpenseTracker.jsx    — Planned cost + misc expenses per week
-    Profile.jsx           — Edit full_name, bio, logout
+    Profile.jsx           — Edit full_name, bio, own recipe grid, logout
+    PublicProfile.jsx     — Read-only profile view at /users/:id, shows public recipes
 
   components/
     common/               — AppLoader, Header, BottomNavigation, FloatingAddButton,
                             EmptyState, ConfirmDialog
     recipe/               — RecipeCard, RecipeCardGrid, CategoryFilter, SearchBar,
-                            IngredientList, StepList, CostSummary
+                            IngredientList, StepList, CostSummary,
+                            StarRating, CommentSection
     form/                 — IngredientRow, StepRow, ImageUploader
     planner/              — WeekCalendar, DayColumn, MealSlot, DayViewPanel
     expenses/             — ExpenseSummaryCard, MiscExpenseList
@@ -106,21 +122,27 @@ src/
 |---|---|
 | `profiles` | User display name, email, bio — linked to `auth.users` |
 | `recipes` | Title, category, serving size, cover image URL, public flag |
-| `ingredients` | Per-recipe: name, quantity, unit, price_per_unit |
+| `ingredients` | Per-recipe: name, quantity, unit, price_per_unit (stores actual price paid) |
 | `steps` | Per-recipe: ordered cooking instructions |
+| `ratings` | One row per user per recipe, integer 1–5, unique on (recipe_id, user_id) |
+| `comments` | User comments on recipes, with body text and profile join |
 | `meal_plans` | One row per user per week (keyed by `week_start` date, always Monday) |
 | `meal_plan_slots` | One recipe per day+meal_time slot within a plan |
 | `expenses` | Misc manual expenses tied to a meal plan week |
 
 ### Cost Formula
-Ingredient costs are **not stored** — computed client-side:
+`price_per_unit` stores the **actual price paid** for the entered quantity (not price per unit).
+Cost is computed client-side:
 ```js
-cost_per_serving = SUM(quantity × price_per_unit) / serving_size
+total_cost    = SUM(price_per_unit)           // across all ingredients
+cost_per_serving = total_cost / serving_size
 ```
 
 ### Image Storage
 Bucket: `recipe-covers` (public)
-Upload path: `{user_id}/{timestamp}-{filename}`
+Upload path: `{user_id}/{timestamp}-{sanitized_filename}`
+Filename is sanitized: `coverFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")`
+Upload always passes `{ contentType: coverFile.type }` to avoid 400 errors.
 
 ---
 
@@ -130,8 +152,21 @@ Upload path: `{user_id}/{timestamp}-{filename}`
 Direct Supabase calls inside `useEffect` — no caching layer:
 ```js
 useEffect(() => {
-  supabase.from('recipes').select('*, profiles(full_name), ingredients(*)').then(...)
+  supabase.from('recipes')
+    .select('*, profiles(full_name), ingredients(*), ratings(rating)')
+    .then(...)
 }, []);
+```
+
+### Rating upsert
+```js
+// Insert or update — check for existing row first, then branch
+const existing = ratings.find(r => r.user_id === currentUser.id);
+if (existing) {
+  supabase.from('ratings').update({ rating: star }).eq('id', existing.id)
+} else {
+  supabase.from('ratings').insert([{ recipe_id, user_id, rating: star }])
+}
 ```
 
 ### Form state
@@ -150,6 +185,9 @@ Delete old ingredients + steps, then re-insert — simpler than diffing.
 
 ### Auth guard
 `ProtectedRoute` in `App.jsx` calls `supabase.auth.getSession()`, shows `AppLoader` while pending, redirects to `/login` if no session.
+
+### Profile creation
+`Register.jsx` explicitly upserts into `profiles` after `signUp` as a safety net alongside the DB trigger `handle_new_user`.
 
 ---
 

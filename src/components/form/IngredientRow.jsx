@@ -10,12 +10,14 @@ function IngredientRow({ ingredient, index, onChange, onRemove }) {
     <div className="ingredient-form-row">
       <input
         type="text"
+        className="ingr-name"
         placeholder="Ingredient name"
         value={ingredient.name}
         onChange={(e) => handleField("name", e.target.value)}
       />
       <input
         type="number"
+        className="ingr-qty"
         placeholder="Qty"
         value={ingredient.quantity}
         onChange={(e) => handleField("quantity", e.target.value)}
@@ -23,6 +25,7 @@ function IngredientRow({ ingredient, index, onChange, onRemove }) {
         step="any"
       />
       <select
+        className="ingr-unit"
         value={ingredient.unit}
         onChange={(e) => handleField("unit", e.target.value)}
       >
@@ -32,7 +35,8 @@ function IngredientRow({ ingredient, index, onChange, onRemove }) {
       </select>
       <input
         type="number"
-        placeholder="Price/unit (₱)"
+        className="ingr-price"
+        placeholder="₱ total"
         value={ingredient.price_per_unit}
         onChange={(e) => handleField("price_per_unit", e.target.value)}
         min="0"
@@ -42,7 +46,7 @@ function IngredientRow({ ingredient, index, onChange, onRemove }) {
         type="button"
         className="delete-btn"
         onClick={() => onRemove(index)}
-        title="Remove ingredient"
+        title="Remove"
       >
         <Trash2 size={14} />
       </button>

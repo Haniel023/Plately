@@ -27,7 +27,7 @@ function Browse() {
     setLoading(true);
     const { data, error } = await supabase
       .from("recipes")
-      .select("*, profiles(full_name), ingredients(*)")
+      .select("*, profiles(full_name), ingredients(*), ratings(rating)")
       .eq("is_public", true)
       .order("created_at", { ascending: false });
 

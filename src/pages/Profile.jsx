@@ -4,12 +4,14 @@ import { LogOut, Edit2, Save } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/common/BottomNavigation";
+import RecipeCardGrid from "../components/recipe/RecipeCardGrid";
 import "../App.css";
 
 function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [recipes, setRecipes] = useState([]);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ full_name: "", bio: "" });
   const [loading, setLoading] = useState(true);
@@ -24,17 +26,20 @@ function Profile() {
   }, []);
 
   async function loadProfile(userId) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    const [profileRes, recipesRes] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).single(),
+      supabase
+        .from("recipes")
+        .select("*, profiles(full_name), ingredients(*), ratings(rating)")
+        .eq("author_id", userId)
+        .order("created_at", { ascending: false }),
+    ]);
 
-    if (data) {
-      setProfile(data);
-      setForm({ full_name: data.full_name || "", bio: data.bio || "" });
+    if (profileRes.data) {
+      setProfile(profileRes.data);
+      setForm({ full_name: profileRes.data.full_name || "", bio: profileRes.data.bio || "" });
     }
-
+    setRecipes(recipesRes.data || []);
     setLoading(false);
   }
 
@@ -98,9 +103,7 @@ function Profile() {
           <div className="profile-header">
             <div className="profile-avatar-lg">{initials}</div>
             <div>
-              <h2 className="profile-name">
-                {profile?.full_name || "No name set"}
-              </h2>
+              <h2 className="profile-name">{profile?.full_name || "No name set"}</h2>
               <p className="profile-email">{user?.email}</p>
             </div>
           </div>
@@ -124,11 +127,7 @@ function Profile() {
               />
 
               <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-                <button
-                  className="primary-btn"
-                  onClick={handleSave}
-                  disabled={saving}
-                >
+                <button className="primary-btn" onClick={handleSave} disabled={saving}>
                   <Save size={16} />
                   {saving ? "Saving..." : "Save"}
                 </button>
@@ -164,6 +163,18 @@ function Profile() {
           {message && (
             <p className="message success" style={{ marginTop: 12 }}>{message}</p>
           )}
+        </div>
+
+        <div className="section-card">
+          <div className="section-header">
+            <div>
+              <h2>My Recipes</h2>
+              <p style={{ margin: "4px 0 0", color: "var(--text-muted)", fontSize: 14 }}>
+                {recipes.length} recipe{recipes.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+          <RecipeCardGrid recipes={recipes} />
         </div>
 
         <div className="section-card">

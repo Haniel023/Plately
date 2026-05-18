@@ -29,6 +29,14 @@ function Register() {
       return;
     }
 
+    if (data.user) {
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        full_name: form.fullName,
+        email: form.email,
+      });
+    }
+
     setLoading(false);
     setSuccess(true);
 

@@ -14,9 +14,11 @@ function IngredientList({ ingredients }) {
             <span>
               {ing.quantity} {ing.unit}
             </span>
-            <span className="ingredient-price">
-              {formatCurrency(ing.price_per_unit)}/{ing.unit}
-            </span>
+            {ing.price_per_unit > 0 && (
+              <span className="ingredient-price">
+                {formatCurrency(ing.price_per_unit)}
+              </span>
+            )}
           </div>
         </div>
       ))}
